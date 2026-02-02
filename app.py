@@ -13,6 +13,7 @@ import re
 from urllib.parse import urlparse
 import logging
 import os
+import html.parser
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clawstin-powers-recipe-secret'
@@ -35,7 +36,7 @@ class RecipeExtractor:
             response = requests.get(url, headers=self.headers, timeout=10)
             response.raise_for_status()
             
-            soup = BeautifulSoup(response.content, 'html.parser')
+            soup = BeautifulSoup(response.content, 'html.parser')  # Using built-in parser instead of lxml
             
             # Try multiple extraction strategies
             recipe_data = self._extract_schema_org(soup)
