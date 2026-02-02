@@ -1,0 +1,4 @@
+web: python app.py
+
+# Or specify the exact command
+# web: gunicorn app:app --bind 0.0.0.0:$PORT

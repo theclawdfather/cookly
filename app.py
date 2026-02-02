@@ -12,6 +12,7 @@ import json
 import re
 from urllib.parse import urlparse
 import logging
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clawstin-powers-recipe-secret'
@@ -199,4 +200,7 @@ def health_check():
     return jsonify({'status': 'healthy', 'service': 'recipe-extractor'})
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Production mode - get port from environment or use default
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('DEBUG', 'False').lower() == 'true'
+    app.run(debug=debug, host='0.0.0.0', port=port)
