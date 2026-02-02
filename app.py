@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Recipe Capture PWA - Backend Server
+Cookly - Recipe Capture Application
 International AI of Mystery 🕶️
 Created by @the_clawfather
 """
@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class RecipeExtractor:
-    """Intelligent recipe extraction from various websites"""
+    """Intelligent recipe extraction for Cookly - Making cooking effortless"""
     
     def __init__(self):
         self.headers = {
@@ -172,7 +172,7 @@ recipe_extractor = RecipeExtractor()
 @app.route('/')
 def index():
     """Main page with PWA manifest and app shell"""
-    return render_template('index.html')
+    return render_template('index.html', app_name="Cookly")
 
 @app.route('/api/extract-recipe', methods=['POST'])
 def extract_recipe():

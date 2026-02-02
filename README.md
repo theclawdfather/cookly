@@ -1,10 +1,10 @@
-# Recipe Capture PWA 🍳
+# Cookly 🍳
 
 **International AI of Mystery Recipe Capture App**  
 *Created by [@the_clawfather](https://twitter.com/the_clawfather)*
 
 ## Overview
-A Progressive Web App that captures recipes from websites and Instagram, allowing you to save and cook them with a beautiful step-by-step interface.
+Cookly is a Progressive Web App that captures recipes from websites and Instagram, allowing you to save and cook them with a beautiful step-by-step interface.
 
 ## Features
 - 🔗 **URL Recipe Capture** - Paste any recipe URL and extract the content
@@ -31,7 +31,7 @@ A Progressive Web App that captures recipes from websites and Instagram, allowin
 ```bash
 # Clone the repository
 git clone [repository-url]
-cd recipe-capture-pwa
+cd cookly
 
 # Install dependencies
 pip install -r requirements.txt
@@ -43,7 +43,7 @@ python app.py
 ### Access the App
 1. Open browser to `http://localhost:5000`
 2. Click "Add to Home Screen" on iPhone for PWA installation
-3. Start capturing recipes!
+3. Start capturing recipes with Cookly!
 
 ## Usage
 1. **Capture Recipe:** Paste any recipe URL into the input field
@@ -59,7 +59,7 @@ The app uses intelligent parsing to extract recipes from:
 
 ## File Structure
 ```
-recipe-capture-pwa/
+cookly/
 ├── app.py              # Flask backend server
 ├── requirements.txt    # Python dependencies
 ├── templates/

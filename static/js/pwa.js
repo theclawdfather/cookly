@@ -1,9 +1,9 @@
 /**
- * Recipe Capture PWA - Service Worker
+ * Cookly - Service Worker
  * International AI of Mystery 🕶️
  * Created by @the_clawfather
  * 
- * Handles caching, offline functionality, and PWA features
+ * Handles caching, offline functionality, and PWA features for Cookly
  */
 
 const CACHE_NAME = 'recipe-capture-v1';
@@ -179,4 +179,4 @@ if ('periodicSync' in self.registration) {
     });
 }
 
-console.log('[Service Worker] Recipe Capture PWA Service Worker loaded');
+console.log('[Service Worker] Cookly Service Worker loaded');

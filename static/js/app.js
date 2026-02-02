@@ -1,10 +1,11 @@
 /**
- * Recipe Capture PWA - Main Application
+ * Cookly - Recipe Capture Application
  * International AI of Mystery 🕶️
  * Created by @the_clawfather
+ * Making recipe capture and cooking effortless
  */
 
-class RecipeCaptureApp {
+class CooklyApp {
     constructor() {
         this.currentRecipe = null;
         this.savedRecipes = this.loadSavedRecipes();
@@ -327,5 +328,5 @@ class RecipeCaptureApp {
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.app = new RecipeCaptureApp();
+    window.app = new CooklyApp();
 });
