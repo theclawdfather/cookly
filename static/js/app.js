@@ -1,7 +1,7 @@
 /**
  * Cookly - Recipe Capture Application
  * International AI of Mystery 🕶️
- * Created by @the_clawfather
+ * Created by @theclawdfather
  * Making recipe capture and cooking effortless
  */
 

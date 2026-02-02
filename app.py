@@ -2,7 +2,7 @@
 """
 Cookly - Recipe Capture Application
 International AI of Mystery 🕶️
-Created by @the_clawfather
+Created by @theclawdfather
 """
 
 from flask import Flask, render_template, request, jsonify

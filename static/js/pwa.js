@@ -1,7 +1,7 @@
 /**
  * Cookly - Service Worker
  * International AI of Mystery 🕶️
- * Created by @the_clawfather
+ * Created by @theclawdfather
  * 
  * Handles caching, offline functionality, and PWA features for Cookly
  */

@@ -1,7 +1,7 @@
 # Cookly 🍳
 
 **International AI of Mystery Recipe Capture App**  
-*Created by [@the_clawfather](https://twitter.com/the_clawfather)*
+*Created by [@theclawdfather](https://twitter.com/theclawdfather)*
 
 ## Overview
 Cookly is a Progressive Web App that captures recipes from websites and Instagram, allowing you to save and cook them with a beautiful step-by-step interface.
