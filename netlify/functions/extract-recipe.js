@@ -2,7 +2,6 @@
 // Cookly - Serverless Recipe Capture
 // Created by @theclawdfather
 
-const axios = require('axios');
 const cheerio = require('cheerio');
 const { URL } = require('url');
 
@@ -71,8 +70,17 @@ async function extractRecipe(url) {
             'User-Agent': 'Cookly Recipe Extractor 1.0'
         };
 
-        const response = await axios.get(url, { headers, timeout: 10000 });
-        const $ = cheerio.load(response.data);
+        const response = await fetch(url, { 
+            headers, 
+            timeout: 10000 
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const html = await response.text();
+        const $ = cheerio.load(html);
 
         const recipeData = {
             title: '',
