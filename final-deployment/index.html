@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookly - Recipe Capture</title>
+    <meta name="theme-color" content="#00ff88">
+    <meta name="description" content="Cookly - Capture, save, and cook recipes with step-by-step guidance">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- iOS PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cookly">
+    <link rel="apple-touch-icon" href="/static/images/cookly-icon-192x192.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/static/images/cookly-icon-32x32.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">🍳 Cookly</h1>
+                <p class="app-subtitle">Recipe Capture, Perfected</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- URL Input Section -->
+            <section class="url-input-section">
+                <div class="input-container">
+                    <label for="recipe-url" class="input-label">Enter Recipe URL:</label>
+                    <div class="url-input-group">
+                        <input 
+                            type="url" 
+                            id="recipe-url" 
+                            class="url-input" 
+                            placeholder="https://example.com/recipe"
+                            required
+                        >
+                        <button id="capture-btn" class="capture-button">
+                            <span class="button-text">Capture Recipe</span>
+                            <span class="loading-spinner" style="display: none;">⏳</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Status Messages -->
+            <div id="status-message" class="status-message" style="display: none;"></div>
+
+            <!-- Recipe Display Section -->
+            <section id="recipe-display" class="recipe-display" style="display: none;">
+                <div class="recipe-header">
+                    <img id="recipe-image" class="recipe-image" alt="Recipe image" style="display: none;">
+                    <div class="recipe-title-section">
+                        <h2 id="recipe-title" class="recipe-title"></h2>
+                        <p id="recipe-description" class="recipe-description"></p>
+                        <div class="recipe-meta">
+                            <span id="recipe-author" class="recipe-author"></span>
+                            <span id="recipe-servings" class="recipe-servings"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recipe-times">
+                    <div class="time-item">
+                        <span class="time-label">Prep:</span>
+                        <span id="prep-time" class="time-value"></span>
+                    </div>
+                    <div class="time-item">
+                        <span class="time-label">Cook:</span>
+                        <span id="cook-time" class="time-value"></span>
+                    </div>
+                    <div class="time-item">
+                        <span class="time-label">Total:</span>
+                        <span id="total-time" class="time-value"></span>
+                    </div>
+                </div>
+
+                <div class="recipe-content">
+                    <div class="ingredients-section">
+                        <h3 class="section-title">Ingredients</h3>
+                        <ul id="ingredients-list" class="ingredients-list"></ul>
+                    </div>
+
+                    <div class="instructions-section">
+                        <h3 class="section-title">Instructions</h3>
+                        <ol id="instructions-list" class="instructions-list"></ol>
+                    </div>
+                </div>
+
+                <div class="recipe-actions">
+                    <button id="save-recipe" class="save-button">💾 Save Recipe</button>
+                    <button id="step-by-step" class="step-button">👨‍🍳 Step-by-Step Mode</button>
+                </div>
+            </section>
+
+            <!-- Step-by-Step Mode -->
+            <section id="step-mode" class="step-mode" style="display: none;">
+                <div class="step-header">
+                    <button id="exit-step-mode" class="exit-button">← Back to Recipe</button>
+                    <h3 id="step-title" class="step-title">Step <span id="current-step">1</span> of <span id="total-steps">1</span></h3>
+                </div>
+                
+                <div class="step-content">
+                    <div id="step-instruction" class="step-instruction"></div>
+                    <div class="step-navigation">
+                        <button id="prev-step" class="nav-button prev-button">← Previous</button>
+                        <button id="next-step" class="nav-button next-button">Next →</button>
+                    </div>
+                </div>
+                
+                <div class="step-progress">
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Saved Recipes -->
+            <section class="saved-recipes">
+                <h3 class="section-title">Saved Recipes</h3>
+                <div id="saved-recipes-list" class="saved-recipes-list">
+                    <p class="no-recipes">No saved recipes yet. Capture your first recipe above!</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Built with 🤖 by International AI of Mystery</p>
+            <p>Created by <a href="https://twitter.com/the_clawfather" target="_blank">@the_clawfather</a></p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/pwa.js"></script>
+</body>
+</html># Force Netlify rebuild
