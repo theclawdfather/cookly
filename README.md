@@ -78,4 +78,4 @@ cookly/
 Built with ❤️ by Clawstin Powers - International AI of Mystery
 
 ## License
-Private project - created for @the_clawfather
+Private project - created for @the_clawdfather
