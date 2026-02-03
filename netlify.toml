@@ -10,15 +10,3 @@
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
-
-[functions]
-  python_bundler = "pip"
-
-[[plugins]]
-  package = "@netlify/plugin-lighthouse"
-  
-  [plugins.inputs.thresholds]
-    performance = 0.8
-    accessibility = 0.9
-    best-practices = 0.9
-    seo = 0.8
