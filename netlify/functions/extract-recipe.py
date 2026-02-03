@@ -13,6 +13,13 @@ def handler(event, context):
     """
     try:
         # Parse the request body
+        if not event.get('body'):
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': 'No request body provided'}),
+                'headers': {'Content-Type': 'application/json'}
+            }
+            
         body = json.loads(event['body'])
         url = body.get('url', '')
         
@@ -29,9 +36,20 @@ def handler(event, context):
         return {
             'statusCode': 200,
             'body': json.dumps(recipe_data),
-            'headers': {'Content-Type': 'application/json'}
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS'
+            }
         }
         
+    except json.JSONDecodeError as e:
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error': 'Invalid JSON in request body'}),
+            'headers': {'Content-Type': 'application/json'}
+        }
     except Exception as e:
         return {
             'statusCode': 500,
@@ -113,7 +131,7 @@ def extract_recipe(url):
     except Exception as e:
         return {'error': str(e), 'source_url': url}
 
-# For Netlify function export
+# For local testing
 if __name__ == "__main__":
     # Test the function locally
     test_event = {
