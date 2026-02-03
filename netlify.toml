@@ -1,11 +1,10 @@
 [build]
-  command = "echo 'Building static site and functions'"
-  publish = "netlify"
+  command = "npm install"
+  publish = "."
   functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
-  EXTERNAL_NODE_MODULES = "axios,cheerio"
 
 [[redirects]]
   from = "/api/*"
