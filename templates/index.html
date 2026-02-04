@@ -188,7 +188,21 @@
                 </div>
             </div>
 
-            <!-- Saved Recipes -->
+            <!-- Household Sync Settings -->
+            <section class="household-sync">
+                <div class="sync-header" onclick="app.toggleSyncSettings()">
+                    <span>🔐 Household Sync</span>
+                    <span id="sync-toggle">▼</span>
+                </div>
+                <div id="sync-settings" class="sync-settings" style="display: none;">
+                    <p class="sync-info">Share recipes with your household. Both of you use the same Household ID.</p>
+                    <div class="sync-form">
+                        <input type="text" id="household-id-input" placeholder="Enter Household ID" class="sync-input">
+                        <button onclick="app.updateHouseholdId()" class="btn-primary sync-btn">Sync</button>
+                    </div>
+                    <p id="current-household" class="current-household">Current: default-household</p>
+                </div>
+            </section>
             <section class="saved-recipes">
                 <div class="saved-recipes-header">
                     <h3 class="section-title">Saved Recipes</h3>
@@ -212,6 +226,9 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="/static/js/firebase.js"></script>
     <script src="/static/js/app.js"></script>
     <script src="/static/js/pwa.js"></script>
 </body>

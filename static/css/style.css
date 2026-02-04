@@ -1097,6 +1097,66 @@ body {
     border-color: var(--primary-color);
 }
 
+/* Household Sync */
+.household-sync {
+    margin-top: 30px;
+    padding: 20px;
+    background: var(--background-medium);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.sync-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.sync-settings {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.sync-info {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.sync-form {
+    display: flex;
+    gap: 10px;
+}
+
+.sync-input {
+    flex: 1;
+    padding: 10px 15px;
+    background: var(--background-dark);
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    border-radius: var(--border-radius);
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.sync-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.sync-btn {
+    padding: 10px 20px;
+}
+
+.current-household {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
 /* Mobile Adjustments */
 @media (max-width: 600px) {
     .recipe-title-row {
@@ -1120,6 +1180,10 @@ body {
     .saved-recipes-header {
         flex-direction: column;
         align-items: flex-start;
+    }
+    
+    .sync-form {
+        flex-direction: column;
     }
 }
 

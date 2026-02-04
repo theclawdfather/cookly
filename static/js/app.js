@@ -8,15 +8,30 @@
 class CooklyApp {
     constructor() {
         this.currentRecipe = null;
-        this.savedRecipes = this.loadSavedRecipes();
+        this.savedRecipes = [];
         this.categories = this.loadCategories();
         this.currentFilter = 'all';
         this.currentStep = 0;
         this.totalSteps = 0;
+        this.firebaseSync = true; // Enable Firebase syncing
         
         this.initializeEventListeners();
-        this.displaySavedRecipes();
         this.initializeCategories();
+        this.initFirebase();
+    }
+
+    async initFirebase() {
+        // Initialize Firebase
+        if (window.cooklyFirebase) {
+            await window.cooklyFirebase.init();
+            
+            // Listen for real-time updates
+            window.cooklyFirebase.onRecipesChanged((recipes) => {
+                this.savedRecipes = recipes;
+                this.saveRecipesToStorage(); // Cache locally
+                this.displaySavedRecipes();
+            });
+        }
     }
 
     initializeEventListeners() {
@@ -259,6 +274,12 @@ class CooklyApp {
         
         this.savedRecipes.push(recipeToSave);
         this.saveRecipesToStorage();
+        
+        // Sync to Firebase
+        if (window.cooklyFirebase && this.firebaseSync) {
+            window.cooklyFirebase.saveRecipe(recipeToSave);
+        }
+        
         this.displaySavedRecipes();
         this.hideSaveDialog();
         this.showStatus('Recipe saved successfully!', 'success');
@@ -553,8 +574,39 @@ class CooklyApp {
         if (confirm('Are you sure you want to delete this recipe?')) {
             this.savedRecipes = this.savedRecipes.filter(r => r.id !== recipeId);
             this.saveRecipesToStorage();
+            
+            // Delete from Firebase
+            if (window.cooklyFirebase && this.firebaseSync) {
+                window.cooklyFirebase.deleteRecipe(recipeId);
+            }
+            
             this.displaySavedRecipes();
             this.showStatus('Recipe deleted', 'info');
+        }
+    }
+
+    toggleSyncSettings() {
+        const settings = document.getElementById('sync-settings');
+        const toggle = document.getElementById('sync-toggle');
+        if (settings.style.display === 'none') {
+            settings.style.display = 'block';
+            toggle.textContent = '▲';
+            // Show current household
+            const current = window.cooklyFirebase ? window.cooklyFirebase.householdId : 'default-household';
+            document.getElementById('current-household').textContent = `Current: ${current}`;
+        } else {
+            settings.style.display = 'none';
+            toggle.textContent = '▼';
+        }
+    }
+
+    updateHouseholdId() {
+        const input = document.getElementById('household-id-input');
+        const newId = input.value.trim();
+        if (newId) {
+            if (window.cooklyFirebase) {
+                window.cooklyFirebase.setHouseholdId(newId);
+            }
         }
     }
 
