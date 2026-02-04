@@ -59,6 +59,22 @@ class CooklyApp {
             shareBtn.addEventListener('click', () => this.shareRecipe());
         }
         
+        // Share dialog tabs
+        document.querySelectorAll('.share-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => this.switchShareTab(e.target.dataset.tab));
+        });
+        
+        // Copy buttons
+        const copyCooklyUrlBtn = document.getElementById('copy-cookly-url');
+        const copyJsonBtn = document.getElementById('copy-json');
+        const sendEmailActionBtn = document.getElementById('send-email-action');
+        const sendEmailBtn = document.getElementById('send-email-btn');
+        
+        if (copyCooklyUrlBtn) copyCooklyUrlBtn.addEventListener('click', () => this.copyCooklyUrl());
+        if (copyJsonBtn) copyJsonBtn.addEventListener('click', () => this.copyShareJson());
+        if (sendEmailActionBtn) sendEmailActionBtn.addEventListener('click', () => this.sendEmailShare());
+        if (sendEmailBtn) sendEmailBtn.addEventListener('click', () => this.sendEmailShare());
+        
         // Step navigation
         const prevStep = document.getElementById('prev-step');
         const nextStep = document.getElementById('next-step');
@@ -279,18 +295,117 @@ class CooklyApp {
     shareRecipe() {
         if (!this.currentRecipe) return;
         
-        const text = this.formatShareText();
-        document.getElementById('share-text').value = text;
+        const shareText = this.formatShareText();
+        const shareJson = JSON.stringify(this.currentRecipe, null, 2);
+        const cooklyUrl = this.generateCooklyUrl();
+        
+        document.getElementById('share-text').value = shareText;
+        document.getElementById('share-json').value = shareJson;
+        document.getElementById('cookly-url').value = cooklyUrl;
         document.getElementById('share-dialog').style.display = 'block';
+        
+        // Reset to text tab
+        this.switchShareTab('text');
+    }
+
+    generateCooklyUrl() {
+        // Create a Cookly share URL with URL-safe base64-encoded recipe data
+        const jsonString = JSON.stringify(this.currentRecipe);
+        const base64 = btoa(unescape(encodeURIComponent(jsonString)));
+        const urlSafe = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        const baseUrl = window.location.origin + window.location.pathname;
+        return `${baseUrl}?import=${urlSafe}`;
+    }
+
+    switchShareTab(tab) {
+        // Update tabs
+        document.querySelectorAll('.share-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.tab === tab);
+        });
+        
+        // Update content
+        document.getElementById('share-text').style.display = tab === 'text' ? 'block' : 'none';
+        document.getElementById('share-email').style.display = tab === 'email' ? 'block' : 'none';
+        document.getElementById('share-cookly').style.display = tab === 'cookly' ? 'block' : 'none';
+        document.getElementById('share-json').style.display = tab === 'json' ? 'block' : 'none';
+        
+        // Update buttons
+        document.getElementById('copy-text').style.display = tab === 'text' ? 'inline-block' : 'none';
+        document.getElementById('copy-cookly-url').style.display = tab === 'cookly' ? 'inline-block' : 'none';
+        document.getElementById('copy-json').style.display = tab === 'json' ? 'inline-block' : 'none';
+        document.getElementById('send-email-action').style.display = tab === 'email' ? 'inline-block' : 'none';
+    }
+
+    async copyCooklyUrl() {
+        const url = document.getElementById('cookly-url').value;
+        try {
+            await navigator.clipboard.writeText(url);
+            this.showStatus('Cookly URL copied!', 'success');
+        } catch (err) {
+            this.showStatus('Failed to copy', 'error');
+        }
+    }
+
+    async copyShareJson() {
+        const json = document.getElementById('share-json').value;
+        try {
+            await navigator.clipboard.writeText(json);
+            this.showStatus('JSON copied!', 'success');
+        } catch (err) {
+            this.showStatus('Failed to copy', 'error');
+        }
+    }
+
+    sendEmailShare() {
+        const emailInput = document.getElementById('share-email-address');
+        const email = emailInput ? emailInput.value.trim() : '';
+        
+        if (!email || !this.isValidEmail(email)) {
+            this.showStatus('Please enter a valid email', 'error');
+            return;
+        }
+        
+        const subject = encodeURIComponent(`Recipe: ${this.currentRecipe.title || 'Shared Recipe'}`);
+        const body = encodeURIComponent(this.formatShareText());
+        
+        window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        this.showStatus('Email client opened!', 'success');
+    }
+
+    isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
     formatShareText() {
         const r = this.currentRecipe;
         let text = `🍳 ${r.title || 'Recipe'}\n\n`;
+        if (r.author) text += `By ${r.author}\n\n`;
+        
+        if (r.prep_time || r.cook_time) {
+            text += `⏱️ Time: `;
+            if (r.prep_time) text += `Prep ${this.formatTime(r.prep_time)} `;
+            if (r.cook_time) text += `Cook ${this.formatTime(r.cook_time)}`;
+            text += `\n`;
+        }
+        if (r.servings) text += `🍽️ Serves: ${r.servings}\n`;
+        text += `\n`;
+        
         text += `📋 Ingredients:\n`;
-        r.ingredients.forEach((ing, i) => text += `${i + 1}. ${ing}\n`);
-        text += `\n👨‍🍳 Instructions:\n`;
-        r.ingredients.forEach((inst, i) => text += `${i + 1}. ${inst}\n`);
+        if (r.ingredients && Array.isArray(r.ingredients)) {
+            r.ingredients.forEach((ing, i) => text += `${i + 1}. ${ing}\n`);
+        }
+        text += `\n`;
+        
+        text += `👨‍🍳 Instructions:\n`;
+        if (r.instructions && Array.isArray(r.instructions)) {
+            r.instructions.forEach((inst, i) => text += `${i + 1}. ${inst}\n`);
+        }
+        
+        if (r.source_url) {
+            text += `\n🔗 Source: ${r.source_url}\n`;
+        }
+        
+        text += `\nCaptured with Cookly 🦾`;
         return text;
     }
 
@@ -356,4 +471,27 @@ class CooklyApp {
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new CooklyApp();
+    
+    // Check for imported recipe from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const importData = urlParams.get('import');
+    
+    if (importData) {
+        try {
+            // URL-safe base64 decoding
+            let encoded = importData.replace(/-/g, '+').replace(/_/g, '/');
+            const padding = 4 - encoded.length % 4;
+            if (padding !== 4) encoded += '='.repeat(padding);
+            
+            const recipeData = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+            window.app.currentRecipe = recipeData;
+            window.app.displayRecipe(recipeData);
+            window.app.showStatus('Recipe imported! Click Save to keep it.', 'success');
+            
+            // Clear URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (err) {
+            console.error('Failed to import:', err);
+        }
+    }
 });
