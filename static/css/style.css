@@ -711,3 +711,344 @@ body {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ====================
+   NEW FEATURES: Categories & Sharing
+   ==================== */
+
+/* Recipe Title Row with Category Badge */
+.recipe-title-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.category-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--primary-color);
+    color: var(--background-dark);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Share Button */
+.share-button {
+    padding: 12px 24px;
+    background: var(--background-dark);
+    border: 2px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    color: var(--primary-color);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.share-button:hover {
+    background: var(--primary-color);
+    color: var(--background-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* Dialog Overlay */
+.dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.dialog-content {
+    background: var(--background-medium);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-hover);
+    border: 2px solid var(--primary-color);
+    max-width: 500px;
+    width: 100%;
+    animation: dialogSlideIn 0.3s ease;
+}
+
+.share-dialog-content {
+    max-width: 600px;
+}
+
+@keyframes dialogSlideIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.dialog-content h3 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.category-select {
+    width: 100%;
+    padding: 12px 15px;
+    background: var(--background-dark);
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    border-radius: var(--border-radius);
+    color: var(--text-primary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.category-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.new-category-group {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.new-category-row {
+    display: flex;
+    gap: 10px;
+}
+
+.new-category-row input {
+    flex: 1;
+    padding: 10px 15px;
+    background: var(--background-dark);
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    border-radius: var(--border-radius);
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.new-category-row input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Buttons */
+.btn-primary {
+    padding: 12px 24px;
+    background: var(--primary-color);
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--background-dark);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    padding: 12px 24px;
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    color: var(--primary-color);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: var(--primary-color);
+    color: var(--background-dark);
+}
+
+.dialog-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 25px;
+}
+
+/* Share Tabs */
+.share-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.share-tab {
+    padding: 10px 20px;
+    background: transparent;
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    border-radius: var(--border-radius);
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.share-tab.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--background-dark);
+    font-weight: 600;
+}
+
+.share-tab:hover:not(.active) {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Share Textarea */
+.share-textarea {
+    width: 100%;
+    min-height: 300px;
+    padding: 15px;
+    background: var(--background-dark);
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    border-radius: var(--border-radius);
+    color: var(--text-primary);
+    font-family: monospace;
+    font-size: 0.9rem;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.share-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Saved Recipes Header with Filter */
+.saved-recipes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.saved-recipes-header .section-title {
+    margin: 0;
+    border: none;
+    padding: 0;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-group label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.category-filter {
+    padding: 8px 12px;
+    background: var(--background-dark);
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    border-radius: var(--border-radius);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.category-filter:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Recipe Card Category */
+.recipe-card-category {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(0, 255, 136, 0.2);
+    color: var(--primary-color);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Share Button in Saved Recipes */
+.share-saved-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    color: var(--primary-color);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.share-saved-btn:hover {
+    background: var(--primary-color);
+    color: var(--background-dark);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+    .recipe-title-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .dialog-actions {
+        flex-direction: column;
+    }
+    
+    .dialog-actions button {
+        width: 100%;
+    }
+    
+    .new-category-row {
+        flex-direction: column;
+    }
+    
+    .saved-recipes-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+

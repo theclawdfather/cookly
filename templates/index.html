@@ -62,7 +62,10 @@
                 <div class="recipe-header">
                     <img id="recipe-image" class="recipe-image" alt="Recipe image" style="display: none;">
                     <div class="recipe-title-section">
-                        <h2 id="recipe-title" class="recipe-title"></h2>
+                        <div class="recipe-title-row">
+                            <h2 id="recipe-title" class="recipe-title"></h2>
+                            <span id="recipe-category-badge" class="category-badge" style="display: none;"></span>
+                        </div>
                         <p id="recipe-description" class="recipe-description"></p>
                         <div class="recipe-meta">
                             <span id="recipe-author" class="recipe-author"></span>
@@ -100,6 +103,7 @@
 
                 <div class="recipe-actions">
                     <button id="save-recipe" class="save-button">💾 Save Recipe</button>
+                    <button id="share-recipe" class="share-button">📤 Share</button>
                     <button id="step-by-step" class="step-button">👨‍🍳 Step-by-Step Mode</button>
                 </div>
             </section>
@@ -126,9 +130,61 @@
                 </div>
             </section>
 
+            <!-- Save Recipe Dialog -->
+            <div id="save-dialog" class="dialog" style="display: none;">
+                <div class="dialog-content">
+                    <h3>Save Recipe</h3>
+                    <div class="form-group">
+                        <label for="save-category">Category:</label>
+                        <select id="save-category" class="category-select">
+                            <option value="">Select a category...</option>
+                        </select>
+                    </div>
+                    <div class="form-group new-category-group">
+                        <label>Or create new:</label>
+                        <div class="new-category-row">
+                            <input type="text" id="new-category-input" placeholder="New category name">
+                            <button id="new-category-btn" class="btn-secondary">Add</button>
+                        </div>
+                    </div>
+                    <div class="dialog-actions">
+                        <button id="cancel-save" class="btn-secondary">Cancel</button>
+                        <button id="confirm-save" class="btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Share Dialog -->
+            <div id="share-dialog" class="dialog" style="display: none;">
+                <div class="dialog-content share-dialog-content">
+                    <h3>Share Recipe</h3>
+                    <div class="share-tabs">
+                        <button class="share-tab active" data-tab="text">Text</button>
+                        <button class="share-tab" data-tab="json">JSON</button>
+                    </div>
+                    <div class="share-content">
+                        <textarea id="share-text" class="share-textarea" readonly></textarea>
+                        <textarea id="share-json" class="share-textarea" readonly style="display: none;"></textarea>
+                    </div>
+                    <div class="dialog-actions">
+                        <button id="copy-text" class="btn-primary">Copy Text</button>
+                        <button id="copy-json" class="btn-primary" style="display: none;">Copy JSON</button>
+                        <button id="close-share" class="btn-secondary">Close</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Saved Recipes -->
             <section class="saved-recipes">
-                <h3 class="section-title">Saved Recipes</h3>
+                <div class="saved-recipes-header">
+                    <h3 class="section-title">Saved Recipes</h3>
+                    <div class="filter-group">
+                        <label for="category-filter">Filter:</label>
+                        <select id="category-filter" class="category-filter">
+                            <option value="all">All Categories</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="saved-recipes-list" class="saved-recipes-list">
                     <p class="no-recipes">No saved recipes yet. Capture your first recipe above!</p>
                 </div>
