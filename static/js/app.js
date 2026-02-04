@@ -108,6 +108,8 @@ class CooklyApp {
         document.getElementById('confirm-save')?.addEventListener('click', () => this.confirmSave());
         document.getElementById('cancel-save')?.addEventListener('click', () => this.hideSaveDialog());
         document.getElementById('new-category-btn')?.addEventListener('click', () => this.addNewCategory());
+        document.getElementById('update-household-btn')?.addEventListener('click', () => this.updateHouseholdId());
+        document.getElementById('sync-header-toggle')?.addEventListener('click', () => this.toggleSyncSettings());
 
         // Share dialog tabs
         document.querySelectorAll('.share-tab').forEach(tab => {

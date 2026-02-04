@@ -190,7 +190,7 @@
 
             <!-- Household Sync Settings -->
             <section class="household-sync">
-                <div class="sync-header" onclick="app.toggleSyncSettings()">
+                <div class="sync-header" id="sync-header-toggle">
                     <span>🔐 Household Sync</span>
                     <span id="sync-toggle">▼</span>
                 </div>
@@ -198,7 +198,7 @@
                     <p class="sync-info">Share recipes with your household. Both of you use the same Household ID.</p>
                     <div class="sync-form">
                         <input type="text" id="household-id-input" placeholder="Enter Household ID" class="sync-input">
-                        <button onclick="app.updateHouseholdId()" class="btn-primary sync-btn">Sync</button>
+                        <button id="update-household-btn" class="btn-primary sync-btn">Sync</button>
                     </div>
                     <p id="current-household" class="current-household">Current: default-household</p>
                 </div>
