@@ -281,8 +281,11 @@ class CooklyApp {
     }
 
     generateCooklyUrl() {
-        // Create a Cookly share URL with base64-encoded recipe data
-        const recipeData = btoa(JSON.stringify(this.currentRecipe));
+        // Create a Cookly share URL with URL-safe base64-encoded recipe data
+        const recipeData = btoa(JSON.stringify(this.currentRecipe))
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
         const baseUrl = window.location.origin + window.location.pathname;
         return `${baseUrl}?import=${encodeURIComponent(recipeData)}`;
     }

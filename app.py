@@ -35,23 +35,28 @@ class RecipeExtractor:
         try:
             # Check if this is a Cookly import URL
             parsed = urlparse(url)
-            if 'import=' in url:
-                from urllib.parse import parse_qs
-                query_params = parse_qs(parsed.query)
-                if 'import' in query_params:
-                    import base64
+            query_params = parse_qs(parsed.query)
+            
+            if 'import' in query_params:
+                import base64
+                try:
                     encoded_data = query_params['import'][0]
-                    recipe_data = json.loads(base64.b64decode(encoded_data).decode('utf-8'))
+                    # URL-safe base64 decoding
+                    decoded_bytes = base64.urlsafe_b64decode(encoded_data + '==')
+                    recipe_data = json.loads(decoded_bytes.decode('utf-8'))
                     recipe_data['source_url'] = url
                     recipe_data['source_domain'] = 'cookly-shared'
                     recipe_data['imported_from'] = 'cookly'
                     return recipe_data
+                except Exception as decode_error:
+                    logger.error(f"Failed to decode import data: {decode_error}")
+                    return {'error': f'Invalid import URL: {str(decode_error)}', 'source_url': url}
             
             # Regular HTTP extraction
             response = requests.get(url, headers=self.headers, timeout=10)
             response.raise_for_status()
             
-            soup = BeautifulSoup(response.content, 'html.parser')  # Using built-in parser instead of lxml
+            soup = BeautifulSoup(response.content, 'html.parser')
             
             # Try multiple extraction strategies
             recipe_data = self._extract_schema_org(soup)
