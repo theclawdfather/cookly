@@ -4,27 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cookly - Recipe Capture</title>
-    <meta name="theme-color" content="#00ff88">
-    <meta name="description" content="Cookly - Capture, save, and cook recipes with step-by-step guidance">
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/static/manifest.json">
-    
-    <!-- iOS PWA Support -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Cookly">
-    <link rel="apple-touch-icon" href="/static/images/cookly-icon-192x192.png">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/static/images/cookly-icon-32x32.png">
-    
-    <!-- Styles -->
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <div class="app-container">
-        <!-- Header -->
         <header class="app-header">
             <div class="header-content">
                 <h1 class="app-title">🍳 Cookly</h1>
@@ -32,9 +15,7 @@
             </div>
         </header>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- URL Input Section -->
             <section class="url-input-section">
                 <div class="input-container">
                     <label for="recipe-url" class="input-label">Enter Recipe URL:</label>
@@ -44,7 +25,6 @@
                             id="recipe-url" 
                             class="url-input" 
                             placeholder="https://example.com/recipe"
-                            required
                         >
                         <button id="capture-btn" class="capture-button">
                             <span class="button-text">Capture Recipe</span>
@@ -54,23 +34,15 @@
                 </div>
             </section>
 
-            <!-- Status Messages -->
             <div id="status-message" class="status-message" style="display: none;"></div>
 
-            <!-- Recipe Display Section -->
             <section id="recipe-display" class="recipe-display" style="display: none;">
                 <div class="recipe-header">
-                    <img id="recipe-image" class="recipe-image" alt="Recipe image" style="display: none;">
+                    <img id="recipe-image" class="recipe-image" alt="Recipe" style="display: none;">
                     <div class="recipe-title-section">
-                        <div class="recipe-title-row">
-                            <h2 id="recipe-title" class="recipe-title"></h2>
-                            <span id="recipe-category-badge" class="category-badge" style="display: none;"></span>
-                        </div>
+                        <h2 id="recipe-title" class="recipe-title"></h2>
                         <p id="recipe-description" class="recipe-description"></p>
-                        <div class="recipe-meta">
-                            <span id="recipe-author" class="recipe-author"></span>
-                            <span id="recipe-servings" class="recipe-servings"></span>
-                        </div>
+                        <p id="recipe-author" class="recipe-author"></p>
                     </div>
                 </div>
 
@@ -102,24 +74,23 @@
                 </div>
 
                 <div class="recipe-actions">
-                    <button id="save-recipe" class="save-button">💾 Save Recipe</button>
+                    <button id="save-recipe" class="save-button">💾 Save</button>
                     <button id="share-recipe" class="share-button">📤 Share</button>
-                    <button id="step-by-step" class="step-button">👨‍🍳 Step-by-Step Mode</button>
+                    <button id="step-by-step" class="step-button">👨‍🍳 Step-by-Step</button>
                 </div>
             </section>
 
-            <!-- Step-by-Step Mode -->
             <section id="step-mode" class="step-mode" style="display: none;">
                 <div class="step-header">
-                    <button id="exit-step-mode" class="exit-button">← Back to Recipe</button>
-                    <h3 id="step-title" class="step-title">Step <span id="current-step">1</span> of <span id="total-steps">1</span></h3>
+                    <button id="exit-step-mode" class="exit-button">← Back</button>
+                    <h3>Step <span id="current-step">1</span> of <span id="total-steps">1</span></h3>
                 </div>
                 
                 <div class="step-content">
                     <div id="step-instruction" class="step-instruction"></div>
                     <div class="step-navigation">
-                        <button id="prev-step" class="nav-button prev-button">← Previous</button>
-                        <button id="next-step" class="nav-button next-button">Next →</button>
+                        <button id="prev-step" class="nav-button">← Previous</button>
+                        <button id="next-step" class="nav-button">Next →</button>
                     </div>
                 </div>
                 
@@ -130,112 +101,31 @@
                 </div>
             </section>
 
-            <!-- Save Recipe Dialog -->
-            <div id="save-dialog" class="dialog" style="display: none;">
-                <div class="dialog-content">
-                    <h3>Save Recipe</h3>
-                    <div class="form-group">
-                        <label for="save-category">Category:</label>
-                        <select id="save-category" class="category-select">
-                            <option value="">Select a category...</option>
-                        </select>
-                    </div>
-                    <div class="form-group new-category-group">
-                        <label>Or create new:</label>
-                        <div class="new-category-row">
-                            <input type="text" id="new-category-input" placeholder="New category name">
-                            <button id="new-category-btn" class="btn-secondary">Add</button>
-                        </div>
-                    </div>
-                    <div class="dialog-actions">
-                        <button id="cancel-save" class="btn-secondary">Cancel</button>
-                        <button id="confirm-save" class="btn-primary">Save</button>
-                    </div>
-                </div>
-            </div>
-
             <!-- Share Dialog -->
             <div id="share-dialog" class="dialog" style="display: none;">
-                <div class="dialog-content share-dialog-content">
+                <div class="dialog-content">
                     <h3>Share Recipe</h3>
-                    <div class="share-tabs">
-                        <button class="share-tab active" data-tab="text">Text</button>
-                        <button class="share-tab" data-tab="email">Email</button>
-                        <button class="share-tab" data-tab="cookly">Cookly URL</button>
-                        <button class="share-tab" data-tab="json">JSON</button>
-                    </div>
-                    <div class="share-content">
-                        <textarea id="share-text" class="share-textarea" readonly></textarea>
-                        <div id="share-email" class="share-email-content" style="display: none;">
-                            <p>Send this recipe via email:</p>
-                            <input type="email" id="share-email-address" placeholder="recipient@example.com" class="email-input">
-                            <button id="send-email-btn" class="btn-primary">Send Email</button>
-                        </div>
-                        <div id="share-cookly" class="share-cookly-content" style="display: none;">
-                            <p>Share this URL with other Cookly users. They can paste it to import the recipe:</p>
-                            <input type="text" id="cookly-url" class="url-input-field" readonly>
-                            <p class="import-instructions">To import: Paste any Cookly URL into the recipe URL input above and click "Capture Recipe"</p>
-                        </div>
-                        <textarea id="share-json" class="share-textarea" readonly style="display: none;"></textarea>
-                    </div>
+                    <textarea id="share-text" class="share-textarea" readonly></textarea>
                     <div class="dialog-actions">
-                        <button id="copy-text" class="btn-primary">Copy Text</button>
-                        <button id="copy-cookly-url" class="btn-primary" style="display: none;">Copy URL</button>
-                        <button id="copy-json" class="btn-primary" style="display: none;">Copy JSON</button>
-                        <button id="send-email-action" class="btn-primary" style="display: none;">Open Email App</button>
-                        <button id="close-share" class="btn-secondary" onclick="app.hideShareDialog()">Close</button>
+                        <button id="copy-text" class="btn-primary">Copy to Clipboard</button>
+                        <button id="close-share" class="btn-secondary">Close</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Household Sync Settings -->
-            <section class="household-sync">
-                <div class="sync-header" id="sync-header-toggle">
-                    <span>🔐 Household Sync</span>
-                    <span id="sync-toggle">▼</span>
-                </div>
-                <div id="sync-settings" class="sync-settings" style="display: none;">
-                    <p class="sync-info">Share recipes with your household. Both of you use the same Household ID.</p>
-                    <div class="sync-form">
-                        <input type="text" id="household-id-input" placeholder="Enter Household ID" class="sync-input">
-                        <button id="update-household-btn" class="btn-primary sync-btn">Sync</button>
-                    </div>
-                    <p id="current-household" class="current-household">Current: default-household</p>
-                </div>
-            </section>
             <section class="saved-recipes">
-                <div class="saved-recipes-header">
-                    <h3 class="section-title">Saved Recipes</h3>
-                    <div class="header-controls">
-                        <div class="search-group">
-                            <input type="text" id="recipe-search" placeholder="🔍 Search recipes..." class="search-input">
-                            <button id="clear-search" class="clear-search-btn" style="display: none;">✕</button>
-                        </div>
-                        <div class="filter-group">
-                            <label for="category-filter">Filter:</label>
-                            <select id="category-filter" class="category-filter">
-                                <option value="all">All Categories</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div id="search-results-info" class="search-results-info" style="display: none;"></div>
+                <h3 class="section-title">Saved Recipes</h3>
                 <div id="saved-recipes-list" class="saved-recipes-list">
-                    <p class="no-recipes">No saved recipes yet. Capture your first recipe above!</p>
+                    <p class="no-recipes">No saved recipes yet.</p>
                 </div>
             </section>
         </main>
 
-        <!-- Footer -->
         <footer class="app-footer">
-            <p>Built with 🤖 by Clawstin Powers - International AI of Mystery</p>
+            <p>Built with 🤖 by Clawstin Powers</p>
         </footer>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="/static/js/firebase.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
 </html>

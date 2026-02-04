@@ -1,238 +1,88 @@
 /**
  * Cookly - Recipe Capture Application
- * International AI of Mystery 🕶️
- * Created by @theclawdfather
- * Making recipe capture and cooking effortless
+ * Simple, working version
  */
 
 class CooklyApp {
     constructor() {
         this.currentRecipe = null;
-        this.savedRecipes = [];
-        this.categories = this.loadCategories();
-        this.currentFilter = 'all';
-        this.searchQuery = '';
-        this.currentStep = 0;
-        this.totalSteps = 0;
-        this.firebaseSync = true; // Enable Firebase syncing
+        this.savedRecipes = this.loadSavedRecipes();
         
-        this.initializeEventListeners();
-        this.initializeCategories();
-        
-        // Initialize Firebase but don't block on it
-        this.initFirebase().catch(err => {
-            console.error('Firebase initialization failed:', err);
-        });
+        this.init();
     }
 
-    async initFirebase() {
-        // First load from localStorage for immediate display
-        this.savedRecipes = this.loadSavedRecipes();
+    init() {
+        console.log('Initializing Cookly...');
+        
+        // Load saved recipes
         this.displaySavedRecipes();
         
-        // Then initialize Firebase for syncing
-        if (window.cooklyFirebase) {
-            try {
-                await window.cooklyFirebase.init();
-                
-                // Listen for real-time updates from Firebase
-                window.cooklyFirebase.onRecipesChanged((firebaseRecipes) => {
-                    if (firebaseRecipes.length > 0) {
-                        // Merge Firebase recipes with local (Firebase wins on conflict)
-                        const localIds = new Set(this.savedRecipes.map(r => r.id));
-                        const newRecipes = firebaseRecipes.filter(r => !localIds.has(r.id));
-                        this.savedRecipes = [...this.savedRecipes, ...newRecipes];
-                        
-                        // Sort by saved date
-                        this.savedRecipes.sort((a, b) => new Date(b.saved_at) - new Date(a.saved_at));
-                        
-                        this.saveRecipesToStorage();
-                        this.displaySavedRecipes();
-                    }
-                });
-                
-                // Sync local recipes TO Firebase if they're not there yet
-                this.savedRecipes.forEach(recipe => {
-                    window.cooklyFirebase.saveRecipe(recipe);
-                });
-            } catch (error) {
-                console.error('Firebase init failed:', error);
-            }
-        }
+        // Attach event listeners
+        this.attachListeners();
+        
+        console.log('Cookly initialized!');
     }
 
-    initializeEventListeners() {
-        console.log('Initializing event listeners...');
-        
+    attachListeners() {
         // Capture button
         const captureBtn = document.getElementById('capture-btn');
-        const recipeUrl = document.getElementById('recipe-url');
-        
         if (captureBtn) {
-            captureBtn.addEventListener('click', () => this.captureRecipe());
-            console.log('✓ Capture button listener attached');
-        } else {
-            console.error('✗ capture-btn not found');
+            captureBtn.addEventListener('click', () => {
+                console.log('Capture button clicked');
+                this.captureRecipe();
+            });
         }
         
-        if (recipeUrl) {
-            recipeUrl.addEventListener('keypress', (e) => {
+        // Enter key on URL input
+        const urlInput = document.getElementById('recipe-url');
+        if (urlInput) {
+            urlInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') this.captureRecipe();
             });
         }
-
-        // Recipe actions - check if elements exist before attaching
-        const saveRecipeBtn = document.getElementById('save-recipe');
-        const stepByStepBtn = document.getElementById('step-by-step');
-        const shareRecipeBtn = document.getElementById('share-recipe');
         
-        if (saveRecipeBtn) saveRecipeBtn.addEventListener('click', () => this.showSaveDialog());
-        if (stepByStepBtn) stepByStepBtn.addEventListener('click', () => this.startStepByStep());
-        if (shareRecipeBtn) shareRecipeBtn.addEventListener('click', () => this.shareRecipe());
-
+        // Save recipe button
+        const saveBtn = document.getElementById('save-recipe');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.saveRecipe());
+        }
+        
+        // Step by step button
+        const stepBtn = document.getElementById('step-by-step');
+        if (stepBtn) {
+            stepBtn.addEventListener('click', () => this.startStepByStep());
+        }
+        
+        // Share button
+        const shareBtn = document.getElementById('share-recipe');
+        if (shareBtn) {
+            shareBtn.addEventListener('click', () => this.shareRecipe());
+        }
+        
         // Step navigation
-        const prevStepBtn = document.getElementById('prev-step');
-        const nextStepBtn = document.getElementById('next-step');
-        const exitStepBtn = document.getElementById('exit-step-mode');
+        const prevStep = document.getElementById('prev-step');
+        const nextStep = document.getElementById('next-step');
+        const exitStep = document.getElementById('exit-step-mode');
         
-        if (prevStepBtn) prevStepBtn.addEventListener('click', () => this.previousStep());
-        if (nextStepBtn) nextStepBtn.addEventListener('click', () => this.nextStep());
-        if (exitStepBtn) exitStepBtn.addEventListener('click', () => this.exitStepMode());
-
-        // Category filter
-        const categoryFilter = document.getElementById('category-filter');
-        if (categoryFilter) {
-            categoryFilter.addEventListener('change', (e) => {
-                this.currentFilter = e.target.value;
-                this.displaySavedRecipes();
-            });
-        }
-
-        // Search functionality
-        const searchInput = document.getElementById('recipe-search');
-        const clearSearchBtn = document.getElementById('clear-search');
+        if (prevStep) prevStep.addEventListener('click', () => this.previousStep());
+        if (nextStep) nextStep.addEventListener('click', () => this.nextStep());
+        if (exitStep) exitStep.addEventListener('click', () => this.exitStepMode());
         
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                this.searchQuery = e.target.value.trim().toLowerCase();
-                if (clearSearchBtn) clearSearchBtn.style.display = this.searchQuery ? 'inline-block' : 'none';
-                this.displaySavedRecipes();
+        // Close share dialog
+        const closeShare = document.getElementById('close-share');
+        if (closeShare) {
+            closeShare.addEventListener('click', () => {
+                document.getElementById('share-dialog').style.display = 'none';
             });
         }
         
-        if (clearSearchBtn) {
-            clearSearchBtn.addEventListener('click', () => {
-                searchInput.value = '';
-                this.searchQuery = '';
-                clearSearchBtn.style.display = 'none';
-                this.displaySavedRecipes();
-            });
+        // Copy buttons
+        const copyText = document.getElementById('copy-text');
+        if (copyText) {
+            copyText.addEventListener('click', () => this.copyShareText());
         }
-
-        // Save dialog
-        const confirmSaveBtn = document.getElementById('confirm-save');
-        const cancelSaveBtn = document.getElementById('cancel-save');
-        const newCategoryBtn = document.getElementById('new-category-btn');
-        const updateHouseholdBtn = document.getElementById('update-household-btn');
-        const syncHeaderToggle = document.getElementById('sync-header-toggle');
         
-        if (confirmSaveBtn) confirmSaveBtn.addEventListener('click', () => this.confirmSave());
-        if (cancelSaveBtn) cancelSaveBtn.addEventListener('click', () => this.hideSaveDialog());
-        if (newCategoryBtn) newCategoryBtn.addEventListener('click', () => this.addNewCategory());
-        if (updateHouseholdBtn) updateHouseholdBtn.addEventListener('click', () => this.updateHouseholdId());
-        if (syncHeaderToggle) syncHeaderToggle.addEventListener('click', () => this.toggleSyncSettings());
-
-        // Share dialog
-        document.querySelectorAll('.share-tab').forEach(tab => {
-            tab.addEventListener('click', (e) => this.switchShareTab(e.target.dataset.tab));
-        });
-        
-        const copyTextBtn = document.getElementById('copy-text');
-        const copyJsonBtn = document.getElementById('copy-json');
-        const copyCooklyUrlBtn = document.getElementById('copy-cookly-url');
-        const closeShareBtn = document.getElementById('close-share');
-        const sendEmailActionBtn = document.getElementById('send-email-action');
-        const sendEmailBtn = document.getElementById('send-email-btn');
-        
-        if (copyTextBtn) copyTextBtn.addEventListener('click', () => this.copyShareText());
-        if (copyJsonBtn) copyJsonBtn.addEventListener('click', () => this.copyShareJson());
-        if (copyCooklyUrlBtn) copyCooklyUrlBtn.addEventListener('click', () => this.copyCooklyUrl());
-        if (closeShareBtn) closeShareBtn.addEventListener('click', () => this.hideShareDialog());
-        if (sendEmailActionBtn) sendEmailActionBtn.addEventListener('click', () => this.sendEmailShare());
-        if (sendEmailBtn) sendEmailBtn.addEventListener('click', () => this.sendEmailShare());
-        
-        console.log('✓ All event listeners initialized');
-    }
-
-    initializeCategories() {
-        // Default categories if none exist
-        if (this.categories.length === 0) {
-            this.categories = ['Dinner', 'Breakfast', 'Dessert', 'Snack', 'Drinks'];
-            this.saveCategories();
-        }
-        this.populateCategorySelects();
-    }
-
-    loadCategories() {
-        try {
-            const stored = localStorage.getItem('recipeCategories');
-            return stored ? JSON.parse(stored) : [];
-        } catch (error) {
-            console.error('Error loading categories:', error);
-            return [];
-        }
-    }
-
-    saveCategories() {
-        try {
-            localStorage.setItem('recipeCategories', JSON.stringify(this.categories));
-        } catch (error) {
-            console.error('Error saving categories:', error);
-        }
-    }
-
-    populateCategorySelects() {
-        // Populate filter dropdown
-        const filterSelect = document.getElementById('category-filter');
-        if (filterSelect) {
-            filterSelect.innerHTML = '<option value="all">All Categories</option>';
-            this.categories.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat;
-                option.textContent = cat;
-                filterSelect.appendChild(option);
-            });
-        }
-
-        // Populate save dialog dropdown
-        const saveSelect = document.getElementById('save-category');
-        if (saveSelect) {
-            saveSelect.innerHTML = '';
-            this.categories.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat;
-                option.textContent = cat;
-                saveSelect.appendChild(option);
-            });
-        }
-    }
-
-    addNewCategory() {
-        const input = document.getElementById('new-category-input');
-        const name = input.value.trim();
-        
-        if (name && !this.categories.includes(name)) {
-            this.categories.push(name);
-            this.saveCategories();
-            this.populateCategorySelects();
-            
-            // Select the new category
-            const saveSelect = document.getElementById('save-category');
-            if (saveSelect) saveSelect.value = name;
-            
-            input.value = '';
-            this.showStatus(`Category "${name}" created!`, 'success');
-        }
+        console.log('Event listeners attached');
     }
 
     async captureRecipe() {
@@ -244,21 +94,13 @@ class CooklyApp {
             return;
         }
 
-        if (!this.isValidUrl(url)) {
-            this.showStatus('Please enter a valid URL', 'error');
-            return;
-        }
-
         this.showLoading(true);
         this.hideRecipeDisplay();
-        this.hideStepMode();
 
         try {
             const response = await fetch('/api/extract-recipe', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: url })
             });
 
@@ -267,37 +109,24 @@ class CooklyApp {
             if (response.ok && !recipeData.error) {
                 this.currentRecipe = recipeData;
                 this.displayRecipe(recipeData);
-                this.showStatus('Recipe captured successfully!', 'success');
+                this.showStatus('Recipe captured!', 'success');
             } else {
-                this.showStatus(`Error: ${recipeData.error || 'Failed to extract recipe'}`, 'error');
+                this.showStatus(`Error: ${recipeData.error || 'Failed to extract'}`, 'error');
             }
         } catch (error) {
-            console.error('Error capturing recipe:', error);
-            this.showStatus('Error connecting to server. Please try again.', 'error');
+            console.error('Error:', error);
+            this.showStatus('Error connecting to server', 'error');
         } finally {
             this.showLoading(false);
         }
     }
 
     displayRecipe(recipeData) {
-        this.showRecipeDisplay();
+        document.getElementById('recipe-display').style.display = 'block';
         
-        // Title and description
-        document.getElementById('recipe-title').textContent = recipeData.title || 'Untitled Recipe';
+        document.getElementById('recipe-title').textContent = recipeData.title || 'Untitled';
         document.getElementById('recipe-description').textContent = recipeData.description || '';
         document.getElementById('recipe-author').textContent = recipeData.author ? `By ${recipeData.author}` : '';
-        document.getElementById('recipe-servings').textContent = recipeData.servings ? `Serves ${recipeData.servings}` : '';
-        
-        // Show category badge if exists
-        const categoryBadge = document.getElementById('recipe-category-badge');
-        if (categoryBadge) {
-            if (recipeData.category) {
-                categoryBadge.textContent = recipeData.category;
-                categoryBadge.style.display = 'inline-block';
-            } else {
-                categoryBadge.style.display = 'none';
-            }
-        }
         
         // Times
         document.getElementById('prep-time').textContent = this.formatTime(recipeData.prep_time);
@@ -305,249 +134,113 @@ class CooklyApp {
         document.getElementById('total-time').textContent = this.formatTime(recipeData.total_time);
         
         // Image
-        const recipeImage = document.getElementById('recipe-image');
+        const img = document.getElementById('recipe-image');
         if (recipeData.image) {
-            recipeImage.src = recipeData.image;
-            recipeImage.style.display = 'block';
+            img.src = recipeData.image;
+            img.style.display = 'block';
         } else {
-            recipeImage.style.display = 'none';
+            img.style.display = 'none';
         }
         
         // Ingredients
-        const ingredientsList = document.getElementById('ingredients-list');
-        ingredientsList.innerHTML = '';
-        recipeData.ingredients.forEach(ingredient => {
+        const ingList = document.getElementById('ingredients-list');
+        ingList.innerHTML = '';
+        recipeData.ingredients.forEach(ing => {
             const li = document.createElement('li');
-            li.textContent = ingredient;
-            ingredientsList.appendChild(li);
+            li.textContent = ing;
+            ingList.appendChild(li);
         });
         
         // Instructions
-        const instructionsList = document.getElementById('instructions-list');
-        instructionsList.innerHTML = '';
-        recipeData.instructions.forEach((instruction, index) => {
+        const instList = document.getElementById('instructions-list');
+        instList.innerHTML = '';
+        recipeData.instructions.forEach((inst, i) => {
             const li = document.createElement('li');
-            li.textContent = instruction;
-            li.className = 'instruction-step';
-            li.dataset.step = index + 1;
-            instructionsList.appendChild(li);
+            li.textContent = inst;
+            instList.appendChild(li);
         });
         
         this.totalSteps = recipeData.instructions.length;
     }
 
-    showSaveDialog() {
-        if (!this.currentRecipe) return;
-        document.getElementById('save-dialog').style.display = 'block';
-    }
-
-    hideSaveDialog() {
-        document.getElementById('save-dialog').style.display = 'none';
-    }
-
-    confirmSave() {
+    saveRecipe() {
         if (!this.currentRecipe) return;
         
-        const categorySelect = document.getElementById('save-category');
-        const category = categorySelect ? categorySelect.value : 'Uncategorized';
-        
-        // Add timestamp, ID, and category
         const recipeToSave = {
             ...this.currentRecipe,
             id: Date.now(),
-            saved_at: new Date().toISOString(),
-            category: category
+            saved_at: new Date().toISOString()
         };
         
         this.savedRecipes.push(recipeToSave);
-        this.saveRecipesToStorage();
-        
-        // Sync to Firebase
-        if (window.cooklyFirebase && this.firebaseSync) {
-            window.cooklyFirebase.saveRecipe(recipeToSave);
-        }
-        
+        this.saveToStorage();
         this.displaySavedRecipes();
-        this.hideSaveDialog();
-        this.showStatus('Recipe saved successfully!', 'success');
+        this.showStatus('Recipe saved!', 'success');
     }
 
-    shareRecipe() {
-        if (!this.currentRecipe) return;
+    displaySavedRecipes() {
+        const container = document.getElementById('saved-recipes-list');
         
-        const shareText = this.generateShareText();
-        const shareJson = JSON.stringify(this.currentRecipe, null, 2);
-        const cooklyUrl = this.generateCooklyUrl();
-        
-        document.getElementById('share-text').value = shareText;
-        document.getElementById('share-json').value = shareJson;
-        document.getElementById('cookly-url').value = cooklyUrl;
-        document.getElementById('share-dialog').style.display = 'block';
-        
-        // Reset to text tab
-        this.switchShareTab('text');
-    }
-
-    generateCooklyUrl() {
-        // Create a Cookly share URL with URL-safe base64-encoded recipe data
-        const jsonString = JSON.stringify(this.currentRecipe);
-        // Convert to base64, then make URL-safe
-        const base64 = btoa(unescape(encodeURIComponent(jsonString)));
-        const urlSafe = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        const baseUrl = window.location.origin + window.location.pathname;
-        return `${baseUrl}?import=${urlSafe}`;
-    }
-
-    async copyCooklyUrl() {
-        const url = document.getElementById('cookly-url').value;
-        try {
-            await navigator.clipboard.writeText(url);
-            this.showStatus('Cookly URL copied! Share it with other Cookly users.', 'success');
-        } catch (err) {
-            this.showStatus('Failed to copy. Please select and copy manually.', 'error');
-        }
-    }
-
-    checkForImportedRecipe() {
-        // Check URL params for imported recipe
-        const urlParams = new URLSearchParams(window.location.search);
-        const importData = urlParams.get('import');
-        
-        if (importData) {
-            try {
-                const recipeData = JSON.parse(atob(decodeURIComponent(importData)));
-                this.currentRecipe = recipeData;
-                this.displayRecipe(recipeData);
-                this.showRecipeDisplay();
-                this.showStatus('Recipe imported successfully! Click "Save Recipe" to keep it.', 'success');
-                
-                // Clear the URL parameter without reloading
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (err) {
-                console.error('Failed to import recipe:', err);
-                this.showStatus('Failed to import recipe. Invalid URL.', 'error');
-            }
-        }
-    }
-
-    hideShareDialog() {
-        document.getElementById('share-dialog').style.display = 'none';
-    }
-
-    switchShareTab(tab) {
-        // Update tabs
-        document.querySelectorAll('.share-tab').forEach(t => {
-            t.classList.toggle('active', t.dataset.tab === tab);
-        });
-        
-        // Update content
-        document.getElementById('share-text').style.display = tab === 'text' ? 'block' : 'none';
-        document.getElementById('share-email').style.display = tab === 'email' ? 'block' : 'none';
-        document.getElementById('share-cookly').style.display = tab === 'cookly' ? 'block' : 'none';
-        document.getElementById('share-json').style.display = tab === 'json' ? 'block' : 'none';
-        
-        // Update buttons
-        document.getElementById('copy-text').style.display = tab === 'text' ? 'inline-block' : 'none';
-        document.getElementById('copy-cookly-url').style.display = tab === 'cookly' ? 'inline-block' : 'none';
-        document.getElementById('copy-json').style.display = tab === 'json' ? 'inline-block' : 'none';
-        document.getElementById('send-email-action').style.display = tab === 'email' ? 'inline-block' : 'none';
-    }
-
-    sendEmailShare() {
-        const email = document.getElementById('share-email-address').value;
-        if (!email || !this.isValidEmail(email)) {
-            this.showStatus('Please enter a valid email address', 'error');
+        if (this.savedRecipes.length === 0) {
+            container.innerHTML = '<p class="no-recipes">No saved recipes yet.</p>';
             return;
         }
         
-        const subject = encodeURIComponent(`Recipe: ${this.currentRecipe.title || 'Shared Recipe'}`);
-        const body = encodeURIComponent(this.generateShareText());
-        
-        // Open mailto link
-        window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-        
-        this.showStatus('Email client opened!', 'success');
-    }
-
-    isValidEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
-
-    generateShareText() {
-        const r = this.currentRecipe;
-        let text = `🍳 ${r.title || 'Recipe'}\n`;
-        if (r.author) text += `By ${r.author}\n`;
-        text += `\n`;
-        
-        if (r.prep_time || r.cook_time) {
-            text += `⏱️ Time: `;
-            if (r.prep_time) text += `Prep ${this.formatTime(r.prep_time)} `;
-            if (r.cook_time) text += `Cook ${this.formatTime(r.cook_time)}`;
-            text += `\n`;
-        }
-        if (r.servings) text += `🍽️ Serves: ${r.servings}\n`;
-        text += `\n`;
-        
-        text += `📋 Ingredients:\n`;
-        r.ingredients.forEach((ing, i) => {
-            text += `${i + 1}. ${ing}\n`;
+        container.innerHTML = '';
+        this.savedRecipes.forEach(recipe => {
+            const card = document.createElement('div');
+            card.className = 'recipe-card';
+            card.innerHTML = `
+                <div class="recipe-card-header">
+                    <h4>${recipe.title || 'Untitled'}</h4>
+                </div>
+                <div class="recipe-card-meta">
+                    <span>${new Date(recipe.saved_at).toLocaleDateString()}</span>
+                    <span>${recipe.ingredients.length} ingredients</span>
+                </div>
+                <div class="recipe-card-actions">
+                    <button onclick="app.loadSavedRecipe(${recipe.id})" class="view-recipe-btn">View</button>
+                    <button onclick="app.deleteRecipe(${recipe.id})" class="delete-recipe-btn">Delete</button>
+                </div>
+            `;
+            container.appendChild(card);
         });
-        text += `\n`;
-        
-        text += `👨‍🍳 Instructions:\n`;
-        r.instructions.forEach((inst, i) => {
-            text += `${i + 1}. ${inst}\n`;
-        });
-        
-        if (r.source_url) {
-            text += `\n🔗 Source: ${r.source_url}\n`;
-        }
-        
-        text += `\nCaptured with Cookly 🦾`;
-        return text;
     }
 
-    async copyShareText() {
-        const text = document.getElementById('share-text').value;
-        try {
-            await navigator.clipboard.writeText(text);
-            this.showStatus('Recipe copied to clipboard!', 'success');
-        } catch (err) {
-            this.showStatus('Failed to copy. Please select and copy manually.', 'error');
+    loadSavedRecipe(id) {
+        const recipe = this.savedRecipes.find(r => r.id === id);
+        if (recipe) {
+            this.currentRecipe = recipe;
+            this.displayRecipe(recipe);
+            window.scrollTo(0, 0);
         }
     }
 
-    async copyShareJson() {
-        const json = document.getElementById('share-json').value;
-        try {
-            await navigator.clipboard.writeText(json);
-            this.showStatus('JSON copied to clipboard!', 'success');
-        } catch (err) {
-            this.showStatus('Failed to copy. Please select and copy manually.', 'error');
+    deleteRecipe(id) {
+        if (confirm('Delete this recipe?')) {
+            this.savedRecipes = this.savedRecipes.filter(r => r.id !== id);
+            this.saveToStorage();
+            this.displaySavedRecipes();
         }
     }
 
     startStepByStep() {
-        if (!this.currentRecipe || this.currentRecipe.instructions.length === 0) {
-            this.showStatus('No instructions available for step-by-step mode', 'error');
-            return;
-        }
+        if (!this.currentRecipe || !this.currentRecipe.instructions.length) return;
         
         this.currentStep = 0;
-        this.showStepMode();
+        document.getElementById('step-mode').style.display = 'block';
         this.updateStepDisplay();
     }
 
     updateStepDisplay() {
         document.getElementById('current-step').textContent = this.currentStep + 1;
         document.getElementById('total-steps').textContent = this.totalSteps;
-        document.getElementById('step-instruction').textContent = this.currentRecipe.instructions[this.currentStep];
+        document.getElementById('step-instruction').textContent = 
+            this.currentRecipe.instructions[this.currentStep];
         
-        // Update navigation buttons
         document.getElementById('prev-step').disabled = this.currentStep === 0;
         document.getElementById('next-step').disabled = this.currentStep === this.totalSteps - 1;
         
-        // Update progress bar
         const progress = ((this.currentStep + 1) / this.totalSteps) * 100;
         document.getElementById('progress-fill').style.width = `${progress}%`;
     }
@@ -567,238 +260,87 @@ class CooklyApp {
     }
 
     exitStepMode() {
-        this.hideStepMode();
-        this.showRecipeDisplay();
+        document.getElementById('step-mode').style.display = 'none';
     }
 
-    saveRecipe() {
-        // Legacy save without category - now shows dialog
-        this.showSaveDialog();
+    shareRecipe() {
+        if (!this.currentRecipe) return;
+        
+        const text = this.formatShareText();
+        document.getElementById('share-text').value = text;
+        document.getElementById('share-dialog').style.display = 'block';
     }
 
-    loadSavedRecipes() {
+    formatShareText() {
+        const r = this.currentRecipe;
+        let text = `🍳 ${r.title || 'Recipe'}\n\n`;
+        text += `📋 Ingredients:\n`;
+        r.ingredients.forEach((ing, i) => text += `${i + 1}. ${ing}\n`);
+        text += `\n👨‍🍳 Instructions:\n`;
+        r.ingredients.forEach((inst, i) => text += `${i + 1}. ${inst}\n`);
+        return text;
+    }
+
+    async copyShareText() {
+        const text = document.getElementById('share-text').value;
         try {
-            const stored = localStorage.getItem('savedRecipes');
-            return stored ? JSON.parse(stored) : [];
-        } catch (error) {
-            console.error('Error loading saved recipes:', error);
-            return [];
+            await navigator.clipboard.writeText(text);
+            this.showStatus('Copied!', 'success');
+        } catch (err) {
+            this.showStatus('Failed to copy', 'error');
         }
-    }
-
-    saveRecipesToStorage() {
-        try {
-            localStorage.setItem('savedRecipes', JSON.stringify(this.savedRecipes));
-        } catch (error) {
-            console.error('Error saving recipes:', error);
-        }
-    }
-
-    displaySavedRecipes() {
-        const container = document.getElementById('saved-recipes-list');
-        const searchInfo = document.getElementById('search-results-info');
-        
-        // Filter recipes
-        let recipesToShow = this.savedRecipes;
-        
-        // Category filter
-        if (this.currentFilter !== 'all') {
-            recipesToShow = recipesToShow.filter(r => r.category === this.currentFilter);
-        }
-        
-        // Search filter
-        if (this.searchQuery) {
-            recipesToShow = recipesToShow.filter(r => {
-                const titleMatch = r.title && r.title.toLowerCase().includes(this.searchQuery);
-                const ingredientMatch = r.ingredients && r.ingredients.some(ing => 
-                    ing.toLowerCase().includes(this.searchQuery)
-                );
-                return titleMatch || ingredientMatch;
-            });
-            
-            // Show search results info
-            if (searchInfo) {
-                searchInfo.style.display = 'block';
-                searchInfo.textContent = `Found ${recipesToShow.length} recipe${recipesToShow.length !== 1 ? 's' : ''} for "${this.searchQuery}"`;
-            }
-        } else {
-            if (searchInfo) searchInfo.style.display = 'none';
-        }
-        
-        if (recipesToShow.length === 0) {
-            let message;
-            if (this.searchQuery) {
-                message = `No recipes found for "${this.searchQuery}"`;
-            } else if (this.currentFilter !== 'all') {
-                message = `No recipes in category "${this.currentFilter}"`;
-            } else {
-                message = 'No saved recipes yet. Capture your first recipe above!';
-            }
-            container.innerHTML = `<p class="no-recipes">${message}</p>`;
-            return;
-        }
-        }
-        
-        container.innerHTML = '';
-        recipesToShow.forEach(recipe => {
-            const recipeCard = document.createElement('div');
-            recipeCard.className = 'recipe-card';
-            const categoryBadge = recipe.category 
-                ? `<span class="recipe-card-category">${recipe.category}</span>` 
-                : '';
-            recipeCard.innerHTML = `
-                <div class="recipe-card-header">
-                    <h4 class="recipe-card-title">${recipe.title || 'Untitled Recipe'}</h4>
-                    ${categoryBadge}
-                </div>
-                <div class="recipe-card-meta">
-                    <span class="recipe-card-date">${new Date(recipe.saved_at).toLocaleDateString()}</span>
-                    <span class="recipe-card-source">${recipe.source_domain}</span>
-                    <span class="recipe-card-ingredients">${recipe.ingredients.length} ingredients</span>
-                </div>
-                <div class="recipe-card-actions">
-                    <button class="view-recipe-btn" onclick="app.viewRecipe(${recipe.id})">View</button>
-                    <button class="share-saved-btn" onclick="app.shareSavedRecipe(${recipe.id})">Share</button>
-                    <button class="delete-recipe-btn" onclick="app.deleteRecipe(${recipe.id})">Delete</button>
-                </div>
-            `;
-            container.appendChild(recipeCard);
-        });
-    }
-
-    shareSavedRecipe(recipeId) {
-        const recipe = this.savedRecipes.find(r => r.id === recipeId);
-        if (recipe) {
-            this.currentRecipe = recipe;
-            this.shareRecipe();
-        }
-    }
-
-    viewRecipe(recipeId) {
-        const recipe = this.savedRecipes.find(r => r.id === recipeId);
-        if (recipe) {
-            this.currentRecipe = recipe;
-            this.displayRecipe(recipe);
-            this.showRecipeDisplay();
-            this.hideStepMode();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    }
-
-    deleteRecipe(recipeId) {
-        if (confirm('Are you sure you want to delete this recipe?')) {
-            this.savedRecipes = this.savedRecipes.filter(r => r.id !== recipeId);
-            this.saveRecipesToStorage();
-            
-            // Delete from Firebase
-            if (window.cooklyFirebase && this.firebaseSync) {
-                window.cooklyFirebase.deleteRecipe(recipeId);
-            }
-            
-            this.displaySavedRecipes();
-            this.showStatus('Recipe deleted', 'info');
-        }
-    }
-
-    toggleSyncSettings() {
-        const settings = document.getElementById('sync-settings');
-        const toggle = document.getElementById('sync-toggle');
-        if (settings.style.display === 'none') {
-            settings.style.display = 'block';
-            toggle.textContent = '▲';
-            // Show current household
-            const current = window.cooklyFirebase ? window.cooklyFirebase.householdId : 'default-household';
-            document.getElementById('current-household').textContent = `Current: ${current}`;
-        } else {
-            settings.style.display = 'none';
-            toggle.textContent = '▼';
-        }
-    }
-
-    updateHouseholdId() {
-        const input = document.getElementById('household-id-input');
-        const newId = input.value.trim();
-        if (newId) {
-            if (window.cooklyFirebase) {
-                window.cooklyFirebase.setHouseholdId(newId);
-            }
-        }
-    }
-
-    // Utility functions
-    isValidUrl(string) {
-        try {
-            new URL(string);
-            return true;
-        } catch (_) {
-            return false;
-        }
-    }
-
-    formatTime(timeString) {
-        if (!timeString) return '';
-        
-        // Handle ISO 8601 duration format (PT30M, PT1H30M, etc.)
-        if (timeString.startsWith('PT')) {
-            const duration = timeString.substring(2);
-            const hours = duration.match(/(\d+)H/);
-            const minutes = duration.match(/(\d+)M/);
-            
-            let result = '';
-            if (hours) result += `${hours[1]}h `;
-            if (minutes) result += `${minutes[1]}min`;
-            return result.trim();
-        }
-        
-        return timeString;
-    }
-
-    showStatus(message, type) {
-        const statusEl = document.getElementById('status-message');
-        statusEl.textContent = message;
-        statusEl.className = `status-message ${type}`;
-        statusEl.style.display = 'block';
-        
-        setTimeout(() => {
-            statusEl.style.display = 'none';
-        }, 5000);
     }
 
     showLoading(show) {
-        const captureBtn = document.getElementById('capture-btn');
-        const buttonText = captureBtn.querySelector('.button-text');
-        const spinner = captureBtn.querySelector('.loading-spinner');
+        const btn = document.getElementById('capture-btn');
+        const text = btn.querySelector('.button-text');
+        const spinner = btn.querySelector('.loading-spinner');
         
-        if (show) {
-            captureBtn.disabled = true;
-            buttonText.style.display = 'none';
-            spinner.style.display = 'inline';
-        } else {
-            captureBtn.disabled = false;
-            buttonText.style.display = 'inline';
-            spinner.style.display = 'none';
-        }
+        btn.disabled = show;
+        text.style.display = show ? 'none' : 'inline';
+        spinner.style.display = show ? 'inline' : 'none';
     }
 
-    showRecipeDisplay() {
-        document.getElementById('recipe-display').style.display = 'block';
+    showStatus(msg, type) {
+        const el = document.getElementById('status-message');
+        el.textContent = msg;
+        el.className = `status-message ${type}`;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 3000);
     }
 
     hideRecipeDisplay() {
         document.getElementById('recipe-display').style.display = 'none';
     }
 
-    showStepMode() {
-        document.getElementById('step-mode').style.display = 'block';
+    formatTime(time) {
+        if (!time) return '';
+        if (time.startsWith('PT')) {
+            const h = time.match(/(\d+)H/);
+            const m = time.match(/(\d+)M/);
+            let r = '';
+            if (h) r += `${h[1]}h `;
+            if (m) r += `${m[1]}min`;
+            return r.trim();
+        }
+        return time;
     }
 
-    hideStepMode() {
-        document.getElementById('step-mode').style.display = 'none';
+    loadSavedRecipes() {
+        try {
+            const stored = localStorage.getItem('savedRecipes');
+            return stored ? JSON.parse(stored) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    saveToStorage() {
+        localStorage.setItem('savedRecipes', JSON.stringify(this.savedRecipes));
     }
 }
 
-// Initialize app when DOM is loaded
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new CooklyApp();
-    window.app.checkForImportedRecipe();
 });
