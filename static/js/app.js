@@ -282,12 +282,12 @@ class CooklyApp {
 
     generateCooklyUrl() {
         // Create a Cookly share URL with URL-safe base64-encoded recipe data
-        const recipeData = btoa(JSON.stringify(this.currentRecipe))
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/, '');
+        const jsonString = JSON.stringify(this.currentRecipe);
+        // Convert to base64, then make URL-safe
+        const base64 = btoa(unescape(encodeURIComponent(jsonString)));
+        const urlSafe = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
         const baseUrl = window.location.origin + window.location.pathname;
-        return `${baseUrl}?import=${encodeURIComponent(recipeData)}`;
+        return `${baseUrl}?import=${urlSafe}`;
     }
 
     async copyCooklyUrl() {

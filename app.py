@@ -42,7 +42,11 @@ class RecipeExtractor:
                 try:
                     encoded_data = query_params['import'][0]
                     # URL-safe base64 decoding
-                    decoded_bytes = base64.urlsafe_b64decode(encoded_data + '==')
+                    # Add padding if needed
+                    padding = 4 - len(encoded_data) % 4
+                    if padding != 4:
+                        encoded_data += '=' * padding
+                    decoded_bytes = base64.urlsafe_b64decode(encoded_data)
                     recipe_data = json.loads(decoded_bytes.decode('utf-8'))
                     recipe_data['source_url'] = url
                     recipe_data['source_domain'] = 'cookly-shared'
