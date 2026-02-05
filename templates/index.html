@@ -155,6 +155,57 @@
                 </div>
             </div>
 
+            <!-- Shop Ingredients Dialog -->
+            <div id="shop-dialog" class="dialog" style="display: none;">
+                <div class="dialog-content shop-dialog-content">
+                    <h3>🛒 Shop Ingredients</h3>
+                    <div class="shop-content">
+                        <p class="shop-description">Choose how you'd like to shop for your ingredients:</p>
+                        
+                        <div class="shop-option">
+                            <button id="copy-shop-list" class="shop-btn">
+                                <span class="shop-btn-icon">📋</span>
+                                <span class="shop-btn-text">Copy List</span>
+                                <span class="shop-btn-desc">Copy formatted list to clipboard</span>
+                            </button>
+                        </div>
+                        
+                        <div class="shop-option">
+                            <button id="open-instacart" class="shop-btn">
+                                <span class="shop-btn-icon">🥕</span>
+                                <span class="shop-btn-text">Instacart</span>
+                                <span class="shop-btn-desc">Open Instacart in new tab</span>
+                            </button>
+                        </div>
+                        
+                        <div class="shop-option">
+                            <button id="open-amazon" class="shop-btn">
+                                <span class="shop-btn-icon">📦</span>
+                                <span class="shop-btn-text">Amazon Fresh</span>
+                                <span class="shop-btn-desc">Open Amazon Fresh in new tab</span>
+                            </button>
+                        </div>
+                        
+                        <div class="shop-option">
+                            <button id="email-shop-list" class="shop-btn">
+                                <span class="shop-btn-icon">📧</span>
+                                <span class="shop-btn-text">Email List</span>
+                                <span class="shop-btn-desc">Send list to your email</span>
+                            </button>
+                        </div>
+                        
+                        <div id="shop-list-preview" class="shop-list-preview" style="display: none;">
+                            <h4>Your Shopping List:</h4>
+                            <textarea id="shop-list-text" class="shop-list-textarea" readonly></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="dialog-actions">
+                        <button id="close-shop" class="btn-secondary">Close</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Shopping List Section -->
             <section id="shopping-list-section" class="shopping-list-section">
                 <div class="shopping-list-header">
@@ -173,6 +224,7 @@
                             <button id="add-shopping-item" class="add-item-btn">+</button>
                         </div>
                         <div class="list-actions">
+                            <button id="shop-ingredients" class="action-btn primary">🛒 Shop Ingredients</button>
                             <button id="clear-purchased" class="action-btn">Clear Purchased</button>
                             <button id="clear-all-items" class="action-btn danger">Clear All</button>
                         </div>

@@ -97,6 +97,29 @@ class CooklyApp {
             clearAllBtn.addEventListener('click', () => this.clearAllShoppingItems());
         }
         
+        // Shop ingredients button
+        const shopIngredientsBtn = document.getElementById('shop-ingredients');
+        if (shopIngredientsBtn) {
+            shopIngredientsBtn.addEventListener('click', () => this.openShopDialog());
+        }
+        
+        // Close shop dialog
+        const closeShopBtn = document.getElementById('close-shop');
+        if (closeShopBtn) {
+            closeShopBtn.addEventListener('click', () => this.closeShopDialog());
+        }
+        
+        // Shop dialog actions
+        const copyShopListBtn = document.getElementById('copy-shop-list');
+        const openInstacartBtn = document.getElementById('open-instacart');
+        const openAmazonBtn = document.getElementById('open-amazon');
+        const emailShopListBtn = document.getElementById('email-shop-list');
+        
+        if (copyShopListBtn) copyShopListBtn.addEventListener('click', () => this.copyShopList());
+        if (openInstacartBtn) openInstacartBtn.addEventListener('click', () => this.openInstacart());
+        if (openAmazonBtn) openAmazonBtn.addEventListener('click', () => this.openAmazonFresh());
+        if (emailShopListBtn) emailShopListBtn.addEventListener('click', () => this.emailShopList());
+        
         // Share dialog tabs
         document.querySelectorAll('.share-tab').forEach(tab => {
             tab.addEventListener('click', (e) => this.switchShareTab(e.target.dataset.tab));
@@ -766,6 +789,120 @@ class CooklyApp {
             this.saveShoppingList();
             this.showStatus('Shopping list cleared', 'success');
         }
+    }
+
+    // ==================== SHOP INGREDIENTS METHODS ====================
+
+    openShopDialog() {
+        if (this.shoppingList.length === 0) {
+            this.showStatus('Shopping list is empty', 'info');
+            return;
+        }
+        
+        const dialog = document.getElementById('shop-dialog');
+        if (dialog) {
+            dialog.style.display = 'flex';
+            this.updateShopListPreview();
+        }
+    }
+
+    closeShopDialog() {
+        const dialog = document.getElementById('shop-dialog');
+        if (dialog) {
+            dialog.style.display = 'none';
+        }
+    }
+
+    updateShopListPreview() {
+        const preview = document.getElementById('shop-list-preview');
+        const textarea = document.getElementById('shop-list-text');
+        
+        if (!preview || !textarea) return;
+        
+        const listText = this.formatShopListText();
+        textarea.value = listText;
+        preview.style.display = 'block';
+    }
+
+    formatShopListText() {
+        const unpurchased = this.shoppingList.filter(item => !item.purchased);
+        
+        if (unpurchased.length === 0) {
+            return '🛒 Shopping List\n\nAll items have been purchased!';
+        }
+        
+        let text = '🛒 Shopping List\n\n';
+        
+        // Group by recipe
+        const grouped = {};
+        const manual = [];
+        
+        unpurchased.forEach(item => {
+            if (item.recipe) {
+                if (!grouped[item.recipe]) grouped[item.recipe] = [];
+                grouped[item.recipe].push(item.text);
+            } else {
+                manual.push(item.text);
+            }
+        });
+        
+        // Add grouped items
+        Object.keys(grouped).forEach(recipe => {
+            text += `📖 ${recipe}\n`;
+            grouped[recipe].forEach(ing => {
+                text += `  ☐ ${ing}\n`;
+            });
+            text += '\n';
+        });
+        
+        // Add manual items
+        if (manual.length > 0) {
+            text += '📝 Other Items\n';
+            manual.forEach(item => {
+                text += `  ☐ ${item}\n`;
+            });
+        }
+        
+        return text;
+    }
+
+    async copyShopList() {
+        const text = this.formatShopListText();
+        try {
+            await navigator.clipboard.writeText(text);
+            this.showStatus('Shopping list copied!', 'success');
+        } catch (err) {
+            this.showStatus('Failed to copy', 'error');
+        }
+    }
+
+    openInstacart() {
+        // Get first few unpurchased items for search
+        const unpurchased = this.shoppingList.filter(item => !item.purchased);
+        if (unpurchased.length === 0) {
+            this.showStatus('No items to shop for', 'info');
+            return;
+        }
+        
+        // Open Instacart in new tab
+        const instacartUrl = 'https://www.instacart.com/store';
+        window.open(instacartUrl, '_blank');
+        this.showStatus('Instacart opened! Paste your copied list.', 'success');
+    }
+
+    openAmazonFresh() {
+        const amazonUrl = 'https://www.amazon.com/alm/storefront?almBrandId=QW1hem9uIEZyZXNo';
+        window.open(amazonUrl, '_blank');
+        this.showStatus('Amazon Fresh opened! Paste your copied list.', 'success');
+    }
+
+    emailShopList() {
+        const text = this.formatShopListText();
+        const subject = encodeURIComponent('Cookly Shopping List');
+        const body = encodeURIComponent(text);
+        
+        window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        this.showStatus('Email client opened!', 'success');
     }
 
     escapeHtml(text) {
