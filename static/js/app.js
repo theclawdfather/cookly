@@ -66,12 +66,10 @@ class CooklyApp {
         
         // Copy buttons
         const copyCooklyUrlBtn = document.getElementById('copy-cookly-url');
-        const copyJsonBtn = document.getElementById('copy-json');
         const sendEmailActionBtn = document.getElementById('send-email-action');
         const sendEmailBtn = document.getElementById('send-email-btn');
         
         if (copyCooklyUrlBtn) copyCooklyUrlBtn.addEventListener('click', () => this.copyCooklyUrl());
-        if (copyJsonBtn) copyJsonBtn.addEventListener('click', () => this.copyShareJson());
         if (sendEmailActionBtn) sendEmailActionBtn.addEventListener('click', () => this.sendEmailShare());
         if (sendEmailBtn) sendEmailBtn.addEventListener('click', () => this.sendEmailShare());
         
@@ -309,11 +307,9 @@ class CooklyApp {
         if (!this.currentRecipe) return;
         
         const shareText = this.formatShareText();
-        const shareJson = JSON.stringify(this.currentRecipe, null, 2);
         const cooklyUrl = this.generateCooklyUrl();
         
         document.getElementById('share-text').value = shareText;
-        document.getElementById('share-json').value = shareJson;
         document.getElementById('cookly-url').value = cooklyUrl;
         document.getElementById('share-dialog').style.display = 'block';
         
@@ -340,12 +336,10 @@ class CooklyApp {
         document.getElementById('share-text').style.display = tab === 'text' ? 'block' : 'none';
         document.getElementById('share-email').style.display = tab === 'email' ? 'block' : 'none';
         document.getElementById('share-cookly').style.display = tab === 'cookly' ? 'block' : 'none';
-        document.getElementById('share-json').style.display = tab === 'json' ? 'block' : 'none';
         
         // Update buttons
         document.getElementById('copy-text').style.display = tab === 'text' ? 'inline-block' : 'none';
         document.getElementById('copy-cookly-url').style.display = tab === 'cookly' ? 'inline-block' : 'none';
-        document.getElementById('copy-json').style.display = tab === 'json' ? 'inline-block' : 'none';
         document.getElementById('send-email-action').style.display = tab === 'email' ? 'inline-block' : 'none';
     }
 
@@ -354,16 +348,6 @@ class CooklyApp {
         try {
             await navigator.clipboard.writeText(url);
             this.showStatus('Cookly URL copied!', 'success');
-        } catch (err) {
-            this.showStatus('Failed to copy', 'error');
-        }
-    }
-
-    async copyShareJson() {
-        const json = document.getElementById('share-json').value;
-        try {
-            await navigator.clipboard.writeText(json);
-            this.showStatus('JSON copied!', 'success');
         } catch (err) {
             this.showStatus('Failed to copy', 'error');
         }
