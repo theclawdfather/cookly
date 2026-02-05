@@ -7,6 +7,8 @@ class CooklyApp {
     constructor() {
         this.currentRecipe = null;
         this.savedRecipes = this.loadSavedRecipes();
+        this.searchQuery = '';
+        this.currentFilter = 'all';
         
         this.init();
     }
@@ -41,10 +43,46 @@ class CooklyApp {
             });
         }
         
-        // Save recipe button
+        // Save recipe button - now opens dialog
         const saveBtn = document.getElementById('save-recipe');
         if (saveBtn) {
-            saveBtn.addEventListener('click', () => this.saveRecipe());
+            saveBtn.addEventListener('click', () => this.showSaveDialog());
+        }
+        
+        // Save dialog buttons
+        const confirmSaveBtn = document.getElementById('confirm-save');
+        const cancelSaveBtn = document.getElementById('cancel-save');
+        if (confirmSaveBtn) confirmSaveBtn.addEventListener('click', () => this.confirmSave());
+        if (cancelSaveBtn) cancelSaveBtn.addEventListener('click', () => this.hideSaveDialog());
+        
+        // Search functionality
+        const searchInput = document.getElementById('search-input');
+        const clearSearchBtn = document.getElementById('clear-search');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                this.searchQuery = e.target.value.trim().toLowerCase();
+                if (clearSearchBtn) clearSearchBtn.style.display = this.searchQuery ? 'inline-block' : 'none';
+                this.displaySavedRecipes();
+            });
+        }
+        
+        if (clearSearchBtn) {
+            clearSearchBtn.addEventListener('click', () => {
+                if (searchInput) searchInput.value = '';
+                this.searchQuery = '';
+                clearSearchBtn.style.display = 'none';
+                this.displaySavedRecipes();
+            });
+        }
+        
+        // Category filter
+        const categoryFilter = document.getElementById('category-filter');
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', (e) => {
+                this.currentFilter = e.target.value;
+                this.displaySavedRecipes();
+            });
         }
         
         // Step by step button
@@ -185,45 +223,91 @@ class CooklyApp {
         this.totalSteps = recipeData.instructions.length;
     }
 
-    saveRecipe() {
-        console.log('Save button clicked, currentRecipe:', this.currentRecipe);
-        if (!this.currentRecipe) {
-            console.log('No current recipe to save');
-            return;
-        }
+    showSaveDialog() {
+        if (!this.currentRecipe) return;
+        const dialog = document.getElementById('save-dialog');
+        if (dialog) dialog.style.display = 'block';
+    }
+
+    hideSaveDialog() {
+        const dialog = document.getElementById('save-dialog');
+        if (dialog) dialog.style.display = 'none';
+    }
+
+    confirmSave() {
+        if (!this.currentRecipe) return;
+        
+        const categorySelect = document.getElementById('recipe-category');
+        const category = categorySelect ? categorySelect.value : 'Uncategorized';
         
         const recipeToSave = {
             ...this.currentRecipe,
             id: Date.now(),
-            saved_at: new Date().toISOString()
+            saved_at: new Date().toISOString(),
+            category: category
         };
         
         console.log('Saving recipe:', recipeToSave);
         this.savedRecipes.push(recipeToSave);
         this.saveToStorage();
         this.displaySavedRecipes();
+        this.hideSaveDialog();
         this.showStatus('Recipe saved!', 'success');
         console.log('Recipe saved successfully');
+    }
+
+    saveRecipe() {
+        // Legacy method - now shows dialog
+        this.showSaveDialog();
     }
 
     displaySavedRecipes() {
         const container = document.getElementById('saved-recipes-list');
         
-        if (this.savedRecipes.length === 0) {
-            container.innerHTML = '<p class="no-recipes">No saved recipes yet.</p>';
+        // Filter recipes
+        let recipesToShow = this.savedRecipes;
+        
+        // Category filter
+        if (this.currentFilter !== 'all') {
+            recipesToShow = recipesToShow.filter(r => r.category === this.currentFilter);
+        }
+        
+        // Search filter
+        if (this.searchQuery) {
+            recipesToShow = recipesToShow.filter(r => {
+                const titleMatch = r.title && r.title.toLowerCase().includes(this.searchQuery);
+                const ingredientMatch = r.ingredients && Array.isArray(r.ingredients) && r.ingredients.some(ing => 
+                    ing.toLowerCase().includes(this.searchQuery)
+                );
+                return titleMatch || ingredientMatch;
+            });
+        }
+        
+        if (recipesToShow.length === 0) {
+            let message = 'No saved recipes yet.';
+            if (this.searchQuery) {
+                message = `No recipes found for "${this.searchQuery}"`;
+            } else if (this.currentFilter !== 'all') {
+                message = `No recipes in category "${this.currentFilter}"`;
+            }
+            container.innerHTML = `<p class="no-recipes">${message}</p>`;
             return;
         }
         
         container.innerHTML = '';
-        this.savedRecipes.forEach(recipe => {
+        recipesToShow.forEach(recipe => {
             const card = document.createElement('div');
             card.className = 'recipe-card';
             const ingredientCount = recipe.ingredients && Array.isArray(recipe.ingredients) 
                 ? recipe.ingredients.length 
                 : 0;
+            const categoryBadge = recipe.category 
+                ? `<span class="recipe-category-badge">${recipe.category}</span>` 
+                : '';
             card.innerHTML = `
                 <div class="recipe-card-header">
                     <h4>${recipe.title || 'Untitled'}</h4>
+                    ${categoryBadge}
                 </div>
                 <div class="recipe-card-meta">
                     <span>${new Date(recipe.saved_at).toLocaleDateString()}</span>
@@ -237,6 +321,14 @@ class CooklyApp {
             `;
             container.appendChild(card);
         });
+    }
+
+    shareRecipeById(id) {
+        const recipe = this.savedRecipes.find(r => r.id === id);
+        if (recipe) {
+            this.currentRecipe = recipe;
+            this.shareRecipe();
+        }
     }
 
     shareRecipeById(id) {

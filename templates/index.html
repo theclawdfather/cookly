@@ -80,6 +80,28 @@
                 </div>
             </section>
 
+            <!-- Save Recipe Dialog -->
+            <div id="save-dialog" class="dialog" style="display: none;">
+                <div class="dialog-content">
+                    <h3>Save Recipe</h3>
+                    <div class="form-group">
+                        <label for="recipe-category">Category:</label>
+                        <select id="recipe-category" class="category-select">
+                            <option value="Dinner">Dinner</option>
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Dessert">Dessert</option>
+                            <option value="Snack">Snack</option>
+                            <option value="Drinks">Drinks</option>
+                        </select>
+                    </div>
+                    <div class="dialog-actions">
+                        <button id="confirm-save" class="btn-primary">Save</button>
+                        <button id="cancel-save" class="btn-secondary">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
             <section id="step-mode" class="step-mode" style="display: none;">
                 <div class="step-header">
                     <button id="exit-step-mode" class="exit-button">← Back</button>
@@ -133,7 +155,26 @@
             </div>
 
             <section class="saved-recipes">
-                <h3 class="section-title">Saved Recipes</h3>
+                <div class="saved-recipes-header">
+                    <h3 class="section-title">Saved Recipes</h3>
+                    <div class="filters">
+                        <div class="search-box">
+                            <input type="text" id="search-input" placeholder="🔍 Search recipes..." class="search-input">
+                            <button id="clear-search" class="clear-btn" style="display: none;">✕</button>
+                        </div>
+                        <div class="filter-box">
+                            <select id="category-filter" class="category-filter">
+                                <option value="all">All Categories</option>
+                                <option value="Dinner">Dinner</option>
+                                <option value="Breakfast">Breakfast</option>
+                                <option value="Lunch">Lunch</option>
+                                <option value="Dessert">Dessert</option>
+                                <option value="Snack">Snack</option>
+                                <option value="Drinks">Drinks</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <div id="saved-recipes-list" class="saved-recipes-list">
                     <p class="no-recipes">No saved recipes yet.</p>
                 </div>
