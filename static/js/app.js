@@ -866,34 +866,82 @@ class CooklyApp {
         return text;
     }
 
-    async copyShopList() {
-        const text = this.formatShopListText();
-        try {
-            await navigator.clipboard.writeText(text);
-            this.showStatus('Shopping list copied!', 'success');
-        } catch (err) {
-            this.showStatus('Failed to copy', 'error');
-        }
+    // Clean ingredient name for search
+    cleanIngredientForSearch(ingredient) {
+        // Remove quantities and measurements
+        let cleaned = ingredient
+            // Remove fractions like "1/2", "3/4"
+            .replace(/\d+\/\d+/g, '')
+            // Remove numbers with units
+            .replace(/\d+\s*(cups?|tbsp|tsp|tablespoons?|teaspoons?|oz|ounces?|lbs?|pounds?|g|grams?|kg|kilos?|ml|milliliters?|l|liters?|pinch|dash|handful|slices?|pieces?|cloves?|cans?|packages?|bunches?)/gi, '')
+            // Remove standalone numbers
+            .replace(/\b\d+\b/g, '')
+            // Remove common preparation words
+            .replace(/\b(fresh|dried|frozen|chopped|diced|minced|sliced|grated|peeled|cut|freshly|ground|whole|large|small|medium)\b/gi, '')
+            // Remove parentheses and their contents
+            .replace(/\([^)]*\)/g, '')
+            // Remove commas and extra info
+            .split(',')[0]
+            // Clean up extra spaces
+            .replace(/\s+/g, ' ')
+            .trim();
+        
+        return cleaned;
+    }
+
+    getMostSearchableIngredient() {
+        const unpurchased = this.shoppingList.filter(item => !item.purchased);
+        if (unpurchased.length === 0) return null;
+        
+        // Clean all ingredients and find the best one
+        const cleaned = unpurchased.map(item => ({
+            original: item.text,
+            cleaned: this.cleanIngredientForSearch(item.text)
+        }));
+        
+        // Sort by length (longer = more specific) and pick the first good one
+        const sorted = cleaned
+            .filter(item => item.cleaned.length > 2) // At least 3 characters
+            .sort((a, b) => b.cleaned.length - a.cleaned.length);
+        
+        return sorted.length > 0 ? sorted[0] : cleaned[0];
     }
 
     openInstacart() {
-        // Get first few unpurchased items for search
-        const unpurchased = this.shoppingList.filter(item => !item.purchased);
-        if (unpurchased.length === 0) {
+        const ingredient = this.getMostSearchableIngredient();
+        if (!ingredient) {
             this.showStatus('No items to shop for', 'info');
             return;
         }
         
-        // Open Instacart in new tab
-        const instacartUrl = 'https://www.instacart.com/store';
+        const searchTerm = encodeURIComponent(ingredient.cleaned);
+        const instacartUrl = `https://www.instacart.com/store/search?query=${searchTerm}`;
         window.open(instacartUrl, '_blank');
-        this.showStatus('Instacart opened! Paste your copied list.', 'success');
+        
+        this.showStatus(`Searching Instacart for "${ingredient.cleaned}"`, 'success');
     }
 
     openAmazonFresh() {
-        const amazonUrl = 'https://www.amazon.com/alm/storefront?almBrandId=QW1hem9uIEZyZXNo';
+        const ingredient = this.getMostSearchableIngredient();
+        if (!ingredient) {
+            this.showStatus('No items to shop for', 'info');
+            return;
+        }
+        
+        const searchTerm = encodeURIComponent(ingredient.cleaned);
+        const amazonUrl = `https://www.amazon.com/s?k=${searchTerm}`;
         window.open(amazonUrl, '_blank');
-        this.showStatus('Amazon Fresh opened! Paste your copied list.', 'success');
+        
+        this.showStatus(`Searching Amazon for "${ingredient.cleaned}"`, 'success');
+    }
+
+    copyShopList() {
+        const text = this.formatShopListText();
+        navigator.clipboard.writeText(text).then(() => {
+            this.showStatus('Shopping list copied!', 'success');
+        }).catch(() => {
+            this.showStatus('Failed to copy', 'error');
+        });
     }
 
     emailShopList() {
